@@ -18,6 +18,10 @@ class UserBusiness:
         self.db = db
 
     async def user_get_all(self):
+        """
+        Lista todos os usuarios
+        :return: lista de usuarios
+        """
         user_list = []
         for user in self.db.query(UserModel).all():
             user_list.append(
@@ -29,6 +33,11 @@ class UserBusiness:
         return UserListSchema(users=user_list, total=self.db.query(UserModel).count())
 
     async def post_user(self, user_body: UserCreateSchema) -> UserModel:
+        """
+        Cadastra um novo usuario
+        :param user_body: schema do pydantic
+        :return: model de usuario
+        """
         self._user_body_check(user_body)
         user = self._user_filter_email(user_body.email)
         if user:
@@ -43,7 +52,11 @@ class UserBusiness:
         return new_user
 
     async def user_login(self, user_body: OAuth2PasswordRequestForm) -> TokenSchema:
-
+        """
+        Login de usuario
+        :param user_body: schema de OAuth2PasswordRequestForm
+        :return: token jwt
+        """
         login_exception = HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={"error": "username or password, incorrect"},
@@ -66,18 +79,39 @@ class UserBusiness:
 
     @staticmethod
     def _password_hashed(password: str) -> str:
+        """
+        Gera um hash
+        :param password: passorwd do usuario
+        :return: password hash
+        """
         pwhash = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
         return pwhash.decode('utf8')
 
     @staticmethod
     def _password_hashed_check(password: str, hash_pass: str) -> bool:
+        """
+        Verifica se o password e valido
+        :param password: password do usuario
+        :param hash_pass: password hash
+        :return: boolean
+        """
         return bcrypt.checkpw(password.encode('utf-8'), hash_pass.encode('utf-8'))
 
     def _user_filter_email(self, email: str):
+        """
+        Pesquisa usuario por email
+        :param email: email do usuario
+        :return: model de usuario
+        """
         return self.db.query(UserModel).filter_by(email=email).first()
 
     @staticmethod
     def _user_body_check(user_body: UserCreateSchema):
+        """
+        Verifica se o json enviado atende as regras
+        :param user_body: schema do pydantic
+        :return: Nao retorna
+        """
         detail_field = {}
 
         if user_body.password != user_body.confirm_password:
@@ -104,6 +138,11 @@ class UserBusiness:
             )
 
     def get_user(self, username: str):
+        """
+        Pesquisa usuario por username
+        :param username: username do usuario
+        :return: schema do pydantic
+        """
         user = self.db.query(UserModel).filter_by(username=username).first()
         if not user:
             raise HTTPException(
@@ -116,21 +155,26 @@ class UserBusiness:
             email=user.email,
             hashed_password=user.password)
 
-    async def get_current_user(self, token: str = Depends(oauth2_scheme)):
-        credentials_exception = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-        try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            username: str = payload.get("sub")
-            if username is None:
-                raise credentials_exception
-            token_data = TokenDataSchema(username=username)
-        except JWTError:
-            raise credentials_exception
-        user = self.get_user(username=token_data.username)
-        if user is None:
-            raise credentials_exception
-        return user
+    # async def get_current_user(self, token: str = Depends(oauth2_scheme)):
+    #     """
+    #
+    #     :param token:
+    #     :return:
+    #     """
+    #     credentials_exception = HTTPException(
+    #         status_code=status.HTTP_401_UNAUTHORIZED,
+    #         detail="Could not validate credentials",
+    #         headers={"WWW-Authenticate": "Bearer"},
+    #     )
+    #     try:
+    #         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    #         username: str = payload.get("sub")
+    #         if username is None:
+    #             raise credentials_exception
+    #         token_data = TokenDataSchema(username=username)
+    #     except JWTError:
+    #         raise credentials_exception
+    #     user = self.get_user(username=token_data.username)
+    #     if user is None:
+    #         raise credentials_exception
+    #     return user
