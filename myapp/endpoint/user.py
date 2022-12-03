@@ -12,7 +12,7 @@ from business.user import UserBusiness
 user_router = InferringRouter()
 
 
-@user_router.get("/user/all")
+@user_router.get("/users")
 async def user_get_all(_token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> UserListSchema:
     return await UserBusiness(db).user_get_all()
 

@@ -9,6 +9,15 @@ from schema.tool import ToolPostSchema, ToolSchema, TagSchema
 tool_router = InferringRouter()
 
 
+@tool_router.get("/")
+async def root_api():
+    return {
+        "API": "fequa API",
+        "Version": "1.0",
+        "Links": ["/docs", "/redoc"]
+    }
+
+
 @tool_router.get("/tools")
 async def tool_get_all(_token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     return await ToolBusiness(db).tool_get_all()
