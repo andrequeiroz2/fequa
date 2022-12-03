@@ -10,14 +10,12 @@ class ToolSchema(BaseModel):
     tags: List[str]
 
 
-class ToolListSchema(BaseModel):
-    tools: List[ToolSchema]
-    total: int
-
-
 class ToolPostSchema(BaseModel):
     title: str
     link: str
     description: str
     tags: List[str]
 
+
+class TagSchema(BaseModel):
+    tag: str

@@ -5,5 +5,4 @@ CREATE TABLE public.tools (
 	description varchar(120) NOT NULL,
 	tags _varchar NOT NULL
 );
-
-ALTER TABLE public.tools ADD tags _varchar NOT NULL;
+CREATE UNIQUE INDEX tools_title_idx ON public.tools USING btree (title);

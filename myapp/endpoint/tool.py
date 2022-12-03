@@ -4,19 +4,35 @@ from dependency.oauth import oauth2_scheme
 from fastapi import Depends, status
 from sqlalchemy.orm import Session
 from database.base import get_db
-from schema.tool import ToolListSchema, ToolPostSchema, ToolSchema
+from schema.tool import ToolPostSchema, ToolSchema, TagSchema
 
 tool_router = InferringRouter()
 
 
-@tool_router.get("/tool/all/")
-async def tool_get_all(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> ToolListSchema:
+@tool_router.get("/tools")
+async def tool_get_all(_token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     return await ToolBusiness(db).tool_get_all()
 
 
-@tool_router.post("/tool/", status_code=status.HTTP_201_CREATED)
+@tool_router.get("/tools/")
+async def tool_get(_token: str = Depends(oauth2_scheme), tag: TagSchema = Depends(), db: Session = Depends(get_db)):
+    return await ToolBusiness(db).tool_get(tag)
+
+
+@tool_router.post("/tools", status_code=status.HTTP_201_CREATED)
 async def tool_create(
         tool_body: ToolPostSchema,
-        token: str = Depends(oauth2_scheme),
+        _token: str = Depends(oauth2_scheme),
         db: Session = Depends(get_db)) -> ToolSchema:
     return await ToolBusiness(db).tool_create(tool_body)
+
+
+@tool_router.delete("/tools/{id}", status_code=status.HTTP_202_ACCEPTED)
+async def tool_delete(
+        id: int,
+        _token: str = Depends(oauth2_scheme),
+        db: Session = Depends(get_db)):
+    await ToolBusiness(db).tool_delete(id)
+    return {}
+
+
