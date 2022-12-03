@@ -12,17 +12,12 @@ from business.user import UserBusiness
 user_router = InferringRouter()
 
 
-@user_router.get("/user/")
-async def user_get(token: str = Depends(oauth2_scheme)):
-    return {"token": token}
-
-
-@user_router.get("/user/all/")
-async def user_get_all(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> UserListSchema:
+@user_router.get("/user/all")
+async def user_get_all(_token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> UserListSchema:
     return await UserBusiness(db).user_get_all()
 
 
-@user_router.post("/user/", status_code=status.HTTP_201_CREATED)
+@user_router.post("/user", status_code=status.HTTP_201_CREATED)
 async def user_create(user_body: UserCreateSchema, db: Session = Depends(get_db)) -> UserSchema:
     user = await UserBusiness(db).post_user(user_body)
     return UserSchema(username=user.username, email=user.email)
