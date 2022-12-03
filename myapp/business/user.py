@@ -2,13 +2,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from datetime import timedelta
-from schema.token import TokenDataSchema, TokenSchema
-from schema.user import UserCreateSchema, UserPassSchema, UserLoginSchema, UserTokenSchema, UserSchema, UserListSchema
+from schema.token import TokenSchema
+from schema.user import UserCreateSchema, UserPassSchema, UserSchema, UserListSchema
 from database.model.user import UserModel
-from dependency.oauth import oauth2_scheme
-from dependency.oauth import SECRET_KEY,ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
-from fastapi import Depends
-from jose import JWTError, jwt
+from dependency.oauth import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
 import bcrypt
 import re
 
@@ -154,27 +151,3 @@ class UserBusiness:
             username=user.username,
             email=user.email,
             hashed_password=user.password)
-
-    # async def get_current_user(self, token: str = Depends(oauth2_scheme)):
-    #     """
-    #
-    #     :param token:
-    #     :return:
-    #     """
-    #     credentials_exception = HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="Could not validate credentials",
-    #         headers={"WWW-Authenticate": "Bearer"},
-    #     )
-    #     try:
-    #         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    #         username: str = payload.get("sub")
-    #         if username is None:
-    #             raise credentials_exception
-    #         token_data = TokenDataSchema(username=username)
-    #     except JWTError:
-    #         raise credentials_exception
-    #     user = self.get_user(username=token_data.username)
-    #     if user is None:
-    #         raise credentials_exception
-    #     return user
